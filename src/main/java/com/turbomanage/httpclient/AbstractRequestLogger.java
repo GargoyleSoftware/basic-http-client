@@ -1,4 +1,3 @@
-
 package com.turbomanage.httpclient;
 
 import java.io.IOException;
@@ -7,15 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Default {@link RequestLogger} used by {@link BasicHttpClient}. In recent
- * versions of Android, log() gets directed to LogCat so this can
- * work for Android, too.
- * http://stackoverflow.com/questions/2220547/why-doesnt-system
- * -out-println-work-in-android
- * 
- * @author David M. Chandler
+ * Created with IntelliJ IDEA.
+ * User: kgalligan
+ * Date: 10/27/12
+ * Time: 12:35 AM
+ * To change this template use File | Settings | File Templates.
  */
-public class ConsoleRequestLogger implements RequestLogger {
+public abstract class AbstractRequestLogger implements RequestLogger {
 
     /*
      * (non-Javadoc)
@@ -29,9 +26,7 @@ public class ConsoleRequestLogger implements RequestLogger {
      * @see com.turbomanage.httpclient.RequestLogger#log(java.lang.String)
      */
     @Override
-    public void log(String msg) {
-        System.out.println(msg);
-    }
+    public abstract void log(String msg);
 
     /*
      * (non-Javadoc)
@@ -39,7 +34,8 @@ public class ConsoleRequestLogger implements RequestLogger {
      * HttpURLConnection, java.lang.Object)
      */
     @Override
-    public void logRequest(HttpURLConnection uc, Object content) throws IOException {
+    public void logRequest(HttpURLConnection uc, Object content) throws IOException
+    {
         log("=== HTTP Request ===");
         log(uc.getRequestMethod() + " " + uc.getURL().toString());
         if (content instanceof String) {
@@ -66,7 +62,7 @@ public class ConsoleRequestLogger implements RequestLogger {
 
     /**
      * Iterate over request or response headers and log them.
-     * 
+     *
      * @param map
      */
     private void logHeaders(Map<String, List<String>> map) {
@@ -81,3 +77,4 @@ public class ConsoleRequestLogger implements RequestLogger {
     }
 
 }
+

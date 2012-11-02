@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 public class HttpGetTest {
 
-    @Test
+    /*@Test
     public void testHttpGet() {
         ParameterMap params = new ParameterMap()
         .add("param1", "value1")
@@ -54,6 +54,6 @@ public class HttpGetTest {
         assertEquals("GET", httpGet.getHttpMethod().getMethodName());
         assertNull(httpGet.getContent());
         assertNull(httpGet.getContentType());
-    }
+    }*/
 
 }
