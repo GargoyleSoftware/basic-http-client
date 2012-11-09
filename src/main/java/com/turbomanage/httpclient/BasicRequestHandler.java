@@ -96,4 +96,10 @@ public abstract class BasicRequestHandler implements RequestHandler {
         return false;
     }
 
+    @Override
+    public void checkReturnStatus(int status) throws HttpStatusException
+    {
+        if(status >= 400)
+            throw new HttpStatusException(status);
+    }
 }

@@ -73,5 +73,6 @@ public interface RequestHandler {
      * @return true if recoverable. Async clients may use this to try again
      */
     boolean onError(HttpRequestException e);
-    
+
+    void checkReturnStatus(int status)throws HttpStatusException;
 }

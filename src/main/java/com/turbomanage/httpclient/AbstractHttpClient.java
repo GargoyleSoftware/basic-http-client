@@ -166,6 +166,8 @@ public abstract class AbstractHttpClient {
      * handler in case of exception. It may be overridden by other clients such
      * {@link AsyncHttpClient} in order to wrap the exception handling for
      * purposes of retries, etc.
+     *
+     * KPG: Not excited about the quiet exception handling. I like to fail (when earned).
      * 
      * @param httpRequest
      * @return Response object (may be null if request did not complete)
@@ -178,6 +180,7 @@ public abstract class AbstractHttpClient {
                     httpRequest.getContent());
         } catch (HttpRequestException hre) {
             requestHandler.onError(hre);
+            httpResponse = hre.getHttpResponse();
         } catch (Exception e) {
             // In case a RuntimeException has leaked out, wrap it in HRE
             requestHandler.onError(new HttpRequestException(e, httpResponse));
@@ -203,6 +206,7 @@ public abstract class AbstractHttpClient {
 
         HttpURLConnection uc = null;
         HttpResponse httpResponse = null;
+        HttpRequestException failedRequestException = null;
 
         try {
             isConnected = false;
@@ -219,11 +223,16 @@ public abstract class AbstractHttpClient {
             if (uc.getDoOutput() && content != null) {
                 writeOutputStream(uc, content);
             }
+
+            int responseCode = uc.getResponseCode();
+            requestHandler.checkReturnStatus(responseCode);
+
             if (uc.getDoInput()) {
                 httpResponse = readInputStream(uc);
             } else {
                 httpResponse = new HttpResponse(uc, null);
             }
+
         } catch (Exception e) {
             // Try reading the error stream to populate status code such as 404
             try {
@@ -232,21 +241,21 @@ public abstract class AbstractHttpClient {
                 e.printStackTrace();
                 // Must catch IOException, but swallow to show first cause only
             } finally {
-                // if status available, return it else throw
-                if (httpResponse != null && httpResponse.getStatus() > 0) {
-                    return httpResponse;
-                }
-                throw new HttpRequestException(e, httpResponse);
+                failedRequestException = new HttpRequestException(e, httpResponse);
             }
         } finally {
-            if (requestLogger.isLoggingEnabled()) {
+            if (requestLogger.isLoggingEnabled() && httpResponse != null) {
                 requestLogger.logResponse(httpResponse);
             }
             if (uc != null) {
                 uc.disconnect();
             }
         }
-        return httpResponse;
+
+        if(failedRequestException != null)
+            throw failedRequestException;
+        else
+            return httpResponse;
     }
 
     /**
