@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>code.google.com</groupId>
     <artifactId>basic-http-client</artifactId>
-    <version>0.87</version>
+    <version>0.87-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>basic-http-client</name>
     <url>http://code.google.com/p/basic-http-client/</url>
@@ -184,6 +184,23 @@
         <log4j-version>1.2.15</log4j-version>
 
     </properties>
+
+
+	 <distributionManagement>
+        <repository>
+            <id>ip-10-112-77-126</id>
+            <name>ip-10-112-77-126-releases</name>
+            <url>http://54.243.50.45:8080/artifactory/libs-release-local</url>
+        </repository>
+        <snapshotRepository>
+            <id>ip-10-112-77-126</id>
+            <name>ip-10-112-77-126-snapshots</name>
+            <url>http://54.243.50.45:8080/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+
+
     <dependencies>
         <!-- =================================================================== -->
         <!-- main dependencies -->
