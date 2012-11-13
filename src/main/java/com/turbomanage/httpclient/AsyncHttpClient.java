@@ -183,8 +183,11 @@ public class AsyncHttpClient extends AbstractHttpClient {
                 }
                 startTime = System.currentTimeMillis();
                 res = doHttpMethod(httpRequest.getPath(),
-                        httpRequest.getHttpMethod(), httpRequest.getContentType(),
-                        httpRequest.getContent());
+                        httpRequest.getHttpMethod(),
+                        httpRequest.getContentType(),
+                        httpRequest.getBoundary(),
+                        httpRequest.getContent(),
+                        httpRequest.getFiles());
                 if (res != null) {
                     return res;
                 }

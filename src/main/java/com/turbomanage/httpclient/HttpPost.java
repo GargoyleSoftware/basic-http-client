@@ -1,5 +1,9 @@
 package com.turbomanage.httpclient;
 
+import com.turbomanage.httpclient.multipart.FilePart;
+
+import java.util.Collection;
+
 /**
  * An HTTP POST request.
  * 
@@ -44,4 +48,20 @@ public class HttpPost extends HttpRequest {
         this.content = data;
     }
 
+    /**
+     * Constructs an HTTP POST request with arbitrary content.
+     * If params is non-null, the name-value pairs will be appended to the QUERY STRING
+     * Uses multipart/form-data to send the files with the request
+     *
+     * @param path Partial URL
+     * @param params Optional name-value pairs to be appended to QUERY STRING
+     * @param files Content to be sent using multipart-form data
+     */
+    public HttpPost(String path, ParameterMap params, Collection<FilePart> files) {
+        super(path, params);
+        this.httpMethod = HttpMethod.POST;
+        this.contentType = MULTIPART;
+        this.boundary = Long.toHexString(System.currentTimeMillis());
+        this.files = files;
+    }
 }

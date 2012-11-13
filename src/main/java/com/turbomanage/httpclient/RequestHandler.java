@@ -40,10 +40,11 @@ public interface RequestHandler {
      * @param urlConnection An open connection
      * @param httpMethod The request method
      * @param contentType MIME type
+     * @param boundary A boundary to be added to content type, or null.  Needed for multipart/form-data
      * @throws IOException
      */
     void prepareConnection(HttpURLConnection urlConnection, HttpMethod httpMethod,
-            String contentType) throws IOException;
+            String contentType, String boundary) throws IOException;
 
     /**
      * Writes to an open, prepared connection. This method is only called when

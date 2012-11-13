@@ -48,13 +48,17 @@ public abstract class BasicRequestHandler implements RequestHandler {
 
     @Override
     public void prepareConnection(HttpURLConnection urlConnection, HttpMethod httpMethod,
-            String contentType) throws IOException {
+            String contentType, String boundary) throws IOException {
         // Configure connection for request method
         urlConnection.setRequestMethod(httpMethod.getMethodName());
         urlConnection.setDoOutput(httpMethod.getDoOutput());
         urlConnection.setDoInput(httpMethod.getDoInput());
         if (contentType != null) {
-            urlConnection.setRequestProperty("Content-Type", contentType);
+            StringBuilder formattedContentType = new StringBuilder(contentType);
+            if(boundary != null) {
+                formattedContentType.append("; boundary=").append(boundary);
+            }
+            urlConnection.setRequestProperty("Content-Type", formattedContentType.toString());
         }
         // Set additional properties
         urlConnection.setRequestProperty("Accept-Charset", UTF8);

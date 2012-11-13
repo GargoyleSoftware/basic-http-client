@@ -1,14 +1,11 @@
 
 package com.turbomanage.httpclient;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.turbomanage.httpclient.multipart.FilePart;
+
+import java.io.*;
+import java.net.*;
+import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -134,6 +131,19 @@ public abstract class AbstractHttpClient {
     }
 
     /**
+     * Execute a POST request with parameter map and return the response.
+     * Uses multipart/form-data to transfer a collection of files along with the request.
+     *
+     * @param path
+     * @param params
+     * @param files
+     * @return Response object
+     */
+    public HttpResponse postMultipart(String path, ParameterMap params, Collection<FilePart> files) {
+        return execute(new HttpPost(path, params, files));
+    }
+
+    /**
      * Execute a PUT request with the supplied content and return the response.
      * 
      * To include name-value pairs in the query string, add them to the path
@@ -176,8 +186,8 @@ public abstract class AbstractHttpClient {
         HttpResponse httpResponse = null;
         try {
             httpResponse = doHttpMethod(httpRequest.getPath(),
-                    httpRequest.getHttpMethod(), httpRequest.getContentType(),
-                    httpRequest.getContent());
+                    httpRequest.getHttpMethod(), httpRequest.getContentType(), httpRequest.getBoundary(),
+                    httpRequest.getContent(), httpRequest.getFiles());
         } catch (HttpRequestException hre) {
             requestHandler.onError(hre);
             httpResponse = hre.getHttpResponse();
@@ -201,8 +211,8 @@ public abstract class AbstractHttpClient {
      * @throws HttpRequestException
      */
     @SuppressWarnings("finally")
-    protected HttpResponse doHttpMethod(String path, HttpMethod httpMethod, String contentType,
-            byte[] content) throws HttpRequestException {
+    protected HttpResponse doHttpMethod(String path, HttpMethod httpMethod, String contentType, String boundary,
+            byte[] content, Collection<FilePart> files) throws HttpRequestException {
 
         HttpURLConnection uc = null;
         HttpResponse httpResponse = null;
@@ -211,7 +221,7 @@ public abstract class AbstractHttpClient {
         try {
             isConnected = false;
             uc = openConnection(path);
-            prepareConnection(uc, httpMethod, contentType);
+            prepareConnection(uc, httpMethod, contentType, boundary);
             appendRequestHeaders(uc);
             if (requestLogger.isLoggingEnabled()) {
                 requestLogger.logRequest(uc, content);
@@ -220,8 +230,12 @@ public abstract class AbstractHttpClient {
             // possible timeout exception occurred
             uc.connect();
             isConnected = true;
-            if (uc.getDoOutput() && content != null) {
-                writeOutputStream(uc, content);
+            if (uc.getDoOutput()) {
+                if(content != null) {
+                    writeOutputStream(uc, content);
+                } else if(files != null) {
+                    doMultipartForm(uc, files, boundary);
+                }
             }
 
             int responseCode = uc.getResponseCode();
@@ -278,10 +292,10 @@ public abstract class AbstractHttpClient {
     }
 
     protected void prepareConnection(HttpURLConnection urlConnection, HttpMethod httpMethod,
-            String contentType) throws IOException {
+            String contentType, String boundary) throws IOException {
         urlConnection.setConnectTimeout(connectionTimeout);
         urlConnection.setReadTimeout(readTimeout);
-        requestHandler.prepareConnection(urlConnection, httpMethod, contentType);
+        requestHandler.prepareConnection(urlConnection, httpMethod, contentType, boundary);
     }
 
     /**
@@ -312,6 +326,69 @@ public abstract class AbstractHttpClient {
             out = urlConnection.getOutputStream();
             if (out != null) {
                 requestHandler.writeStream(out, content);
+            }
+            return urlConnection.getResponseCode();
+        } finally {
+            // catch not necessary since method throws Exception
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (Exception e) {
+                    // Swallow to show first cause only
+                }
+            }
+        }
+    }
+
+    /**
+     * Writes the request to the server. Uses Multipart/form-data to write the files
+     *
+     * @param urlConnection
+     * @param files to be written
+     * @return HTTP status code
+     * @throws Exception in order to force calling code to deal with possible
+     *             NPEs also
+     */
+    protected int doMultipartForm(HttpURLConnection urlConnection, Collection<FilePart> files, String boundary) throws Exception {
+        OutputStream out = null;
+        try {
+            out = urlConnection.getOutputStream();
+            if (out != null) {
+                String CRLF = "\r\n"; // Line separator required by multipart/form-data.
+                PrintWriter writer = null;
+
+                try {
+                    writer = new PrintWriter(new OutputStreamWriter(out, RequestHandler.UTF8), true);
+
+                    for(FilePart file : files)
+                    {
+                        writer.append("--").append(boundary).append(CRLF);
+                        writer.append("Content-Disposition: form-data; name=\"binaryFile\"; filename=\"").append(file.getName()).append("\"").append(CRLF);
+                        writer.append("Content-Type: ").append(URLConnection.guessContentTypeFromName(file.getName())).append(CRLF);
+                        writer.append("Content-Transfer-Encoding: binary").append(CRLF);
+                        writer.append(CRLF).flush();
+                        InputStream input = null;
+                        try {
+                            input = file.getStream();
+                            byte[] buffer = new byte[1024];
+                            for (int length = 0; (length = input.read(buffer)) > 0;) {
+                                out.write(buffer, 0, length);
+                            }
+                            out.flush();
+                        } finally {
+                            if (input != null) try { input.close(); } catch (IOException logOrIgnore) {}
+                        }
+                        writer.append(CRLF).flush(); // CRLF here indicates end of file.
+                    }
+
+                    // Signal end of multipart/form-data.
+                    writer.append("--").append(boundary).append("--").append(CRLF);
+
+                } finally {
+                    if (writer != null) {
+                        writer.close();
+                    }
+                }
             }
             return urlConnection.getResponseCode();
         } finally {
@@ -394,7 +471,7 @@ public abstract class AbstractHttpClient {
      * Adds to the headers that will be sent with each request from this client
      * instance. The request headers added with this method are applied by
      * calling {@link HttpURLConnection#setRequestProperty(String, String)}
-     * after {@link #prepareConnection(HttpURLConnection, HttpMethod, String)},
+     * after {@link #prepareConnection(HttpURLConnection, HttpMethod, String, String)},
      * so they may supplement or replace headers which have already been set.
      * Calls to {@link #addHeader(String, String)} may be chained. To clear all
      * headers added with this method, call {@link #clearHeaders()}.
