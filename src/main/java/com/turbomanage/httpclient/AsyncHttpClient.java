@@ -185,9 +185,8 @@ public class AsyncHttpClient extends AbstractHttpClient {
                 res = doHttpMethod(httpRequest.getPath(),
                         httpRequest.getHttpMethod(),
                         httpRequest.getContentType(),
-                        httpRequest.getBoundary(),
                         httpRequest.getContent(),
-                        httpRequest.getFiles());
+                        httpRequest.getMultipartWrapper());
                 if (res != null) {
                     return res;
                 }

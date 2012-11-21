@@ -1,6 +1,7 @@
 package com.turbomanage.httpclient;
 
-import com.turbomanage.httpclient.multipart.FilePart;
+import com.turbomanage.httpclient.multipart.BodyPart;
+import com.turbomanage.httpclient.multipart.MultipartWrapper;
 
 import java.util.Collection;
 
@@ -17,9 +18,9 @@ public abstract class HttpRequest {
     protected String path = ""; // avoid null in URL
     protected HttpMethod httpMethod;
     protected String contentType;
-    protected String boundary = null;
     protected byte[] content;
-    protected Collection<FilePart> files;
+
+    protected MultipartWrapper multipartWrapper = null;
     
     /**
      * Constructs a request with optional params appended
@@ -50,16 +51,12 @@ public abstract class HttpRequest {
     public String getContentType() {
         return contentType;
     }
-
-    public String getBoundary() {
-        return boundary;
-    }
     
     public byte[] getContent() {
         return content;
     }
 
-    public Collection<FilePart> getFiles() {
-        return files;
+    public MultipartWrapper getMultipartWrapper() {
+        return multipartWrapper;
     }
 }

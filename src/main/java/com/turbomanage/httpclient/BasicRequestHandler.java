@@ -1,6 +1,8 @@
 
 package com.turbomanage.httpclient;
 
+import com.turbomanage.httpclient.multipart.MultipartWrapper;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,20 +50,30 @@ public abstract class BasicRequestHandler implements RequestHandler {
 
     @Override
     public void prepareConnection(HttpURLConnection urlConnection, HttpMethod httpMethod,
-            String contentType, String boundary) throws IOException {
+            String contentType, MultipartWrapper multipartWrapper) throws IOException {
         // Configure connection for request method
         urlConnection.setRequestMethod(httpMethod.getMethodName());
         urlConnection.setDoOutput(httpMethod.getDoOutput());
         urlConnection.setDoInput(httpMethod.getDoInput());
+
+        //Set Content-Type
         if (contentType != null) {
             StringBuilder formattedContentType = new StringBuilder(contentType);
-            if(boundary != null) {
-                formattedContentType.append("; boundary=").append(boundary);
+            if(multipartWrapper != null) {
+                formattedContentType.append("; boundary=").append(multipartWrapper.getBoundary());
             }
             urlConnection.setRequestProperty("Content-Type", formattedContentType.toString());
         }
+
         // Set additional properties
-        urlConnection.setRequestProperty("Accept-Charset", UTF8);
+        if(multipartWrapper != null)
+        {
+            urlConnection.setRequestProperty("Content-Length", Long.toString(multipartWrapper.getContentLength()));
+        }
+        else
+        {
+            urlConnection.setRequestProperty("Accept-Charset", UTF8);
+        }
     }
 
     @Override

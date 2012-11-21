@@ -1,6 +1,7 @@
 package com.turbomanage.httpclient;
 
-import com.turbomanage.httpclient.multipart.FilePart;
+import com.turbomanage.httpclient.multipart.BodyPart;
+import com.turbomanage.httpclient.multipart.MultipartWrapper;
 
 import java.util.Collection;
 
@@ -55,13 +56,13 @@ public class HttpPost extends HttpRequest {
      *
      * @param path Partial URL
      * @param params Optional name-value pairs to be appended to QUERY STRING
-     * @param files Content to be sent using multipart-form data
+     * @param parts Content to be sent using multipart-form data
      */
-    public HttpPost(String path, ParameterMap params, Collection<FilePart> files) {
+    public HttpPost(String path, ParameterMap params, Collection<BodyPart> parts)
+    {
         super(path, params);
         this.httpMethod = HttpMethod.POST;
         this.contentType = MULTIPART;
-        this.boundary = Long.toHexString(System.currentTimeMillis());
-        this.files = files;
+        this.multipartWrapper = new MultipartWrapper(Long.toHexString(System.currentTimeMillis()), parts);
     }
 }

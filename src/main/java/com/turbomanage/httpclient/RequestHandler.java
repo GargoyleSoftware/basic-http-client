@@ -1,6 +1,8 @@
 
 package com.turbomanage.httpclient;
 
+import com.turbomanage.httpclient.multipart.MultipartWrapper;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -40,11 +42,11 @@ public interface RequestHandler {
      * @param urlConnection An open connection
      * @param httpMethod The request method
      * @param contentType MIME type
-     * @param boundary A boundary to be added to content type, or null.  Needed for multipart/form-data
+     * @param multipartWrapper a wrapper containing data needed for extra headers when using multipart/form-data
      * @throws IOException
      */
     void prepareConnection(HttpURLConnection urlConnection, HttpMethod httpMethod,
-            String contentType, String boundary) throws IOException;
+            String contentType, MultipartWrapper multipartWrapper) throws IOException;
 
     /**
      * Writes to an open, prepared connection. This method is only called when
