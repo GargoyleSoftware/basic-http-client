@@ -48,6 +48,11 @@ public abstract class AbstractHttpClient {
     private boolean isConnected;
 
     /**
+     * Proxy that this connection will use
+     */
+    private Proxy proxy = null;
+
+    /**
      * Constructs a client with empty baseUrl. Prevent sub-classes from calling
      * this as it doesn't result in an instance of the subclass.
      */
@@ -290,7 +295,7 @@ public abstract class AbstractHttpClient {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException(requestUrl + " is not a valid URL", e);
         }
-        return requestHandler.openConnection(requestUrl);
+        return requestHandler.openConnection(requestUrl, proxy);
     }
 
     protected void prepareConnection(HttpURLConnection urlConnection, HttpMethod httpMethod,
@@ -533,6 +538,16 @@ public abstract class AbstractHttpClient {
      */
     public void setReadTimeout(int readTimeout) {
         this.readTimeout = readTimeout;
+    }
+
+    /**
+     * Sets the information needed to route the client's connections through a proxy
+     *
+     * @param host The address of the proxy
+     * @param port The port that the proxy is listening on
+     */
+    public void setProxy(String host, int port) {
+        proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
 
 }

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 
 /**
@@ -26,12 +27,22 @@ public interface RequestHandler {
 
     /**
      * Opens an HTTP connection.
-     * 
+     *
      * @param url Absolute URL
      * @return an open {@link HttpURLConnection}
      * @throws IOException
      */
     HttpURLConnection openConnection(String url) throws IOException;
+
+    /**
+     * Opens an HTTP connection.
+     * 
+     * @param url Absolute URL
+     * @param proxy the proxy to be used (can be null for no proxy)
+     * @return an open {@link HttpURLConnection}
+     * @throws IOException
+     */
+    HttpURLConnection openConnection(String url, Proxy proxy) throws IOException;
 
     /**
      * Prepares a previously opened connection. It is called before

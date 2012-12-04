@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 
 /**
@@ -43,8 +44,14 @@ public abstract class BasicRequestHandler implements RequestHandler {
 
     @Override
     public HttpURLConnection openConnection(String urlString) throws IOException {
+        return openConnection(urlString, null);
+    }
+
+    @Override
+    public HttpURLConnection openConnection(String urlString, Proxy proxy) throws IOException
+    {
         URL url = new URL(urlString);
-        HttpURLConnection uc = (HttpURLConnection) url.openConnection();
+        HttpURLConnection uc = (HttpURLConnection) url.openConnection(proxy != null ? proxy : Proxy.NO_PROXY);
         return uc;
     }
 
