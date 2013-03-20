@@ -32,7 +32,7 @@ public class SimpleServerTest
     @Before
     public void init() throws IOException
     {
-        container = new BadRequestServer(404);
+        container = new BadRequestServer(503);
         connection = new SocketConnection(container);
         SocketAddress address = new InetSocketAddress(PORT);
 
