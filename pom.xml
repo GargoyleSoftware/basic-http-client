@@ -4,24 +4,28 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>code.google.com</groupId>
     <artifactId>basic-http-client</artifactId>
-    <version>0.87-SNAPSHOT</version>
+    <!--<version>0.87-SNAPSHOT</version>-->
+    <version>0.87</version>
     <packaging>jar</packaging>
     <name>basic-http-client</name>
     <url>http://code.google.com/p/basic-http-client/</url>
     <description>basic-http-client</description>
 
     <build>
-        <!--<finalName>basic-http-client</finalName>-->
+       <!--<finalName>basic-http-client</finalName>-->
+
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
-        </resources>
+          </resources>
+
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
             </testResource>
-        </testResources>
+          </testResources>
+
         <plugins>
 
             <plugin>
@@ -183,23 +187,20 @@
         <junit-version>4.8.1</junit-version>
         <log4j-version>1.2.15</log4j-version>
 
-    </properties>
+      </properties>
 
-
-	 <distributionManagement>
-        <repository>
-            <id>ip-10-112-77-126</id>
-            <name>ip-10-112-77-126-releases</name>
-            <url>http://54.243.50.45:8080/artifactory/libs-release-local</url>
-        </repository>
-        <snapshotRepository>
-            <id>ip-10-112-77-126</id>
-            <name>ip-10-112-77-126-snapshots</name>
-            <url>http://54.243.50.45:8080/artifactory/libs-snapshot-local</url>
-        </snapshotRepository>
+    <distributionManagement>
+      <repository>
+        <id>archiva.internal</id>
+        <name>Internal Release Repository</name>
+        <url>http://archiva.gargoyle.co/archiva/repository/internal/</url>
+      </repository>
+      <snapshotRepository>
+        <id>archiva.snapshots</id>
+        <name>Internal Snapshot Repository</name>
+        <url>http://archiva.gargoyle.co/archiva/repository/internal/</url>
+      </snapshotRepository>
     </distributionManagement>
-
-
 
     <dependencies>
         <!-- =================================================================== -->
